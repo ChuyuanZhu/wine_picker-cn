@@ -1,0 +1,703 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍷 今天喝什么酒？</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Georgia', 'Songti SC', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2c1810 0%, #4a1942 50%, #1a0a2e 100%);
+    color: #f5e6d3;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .container {
+    text-align: center;
+    max-width: 420px;
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 1.8em;
+    margin-bottom: 8px;
+    text-shadow: 0 0 20px rgba(255,150,100,0.3);
+  }
+
+  .subtitle {
+    font-size: 0.9em;
+    color: #c9a87c;
+    margin-bottom: 30px;
+  }
+
+  /* ===== 碰杯区域 ===== */
+  .cheers-area {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 160px;
+    position: relative;
+    margin-bottom: 25px;
+    gap: 18px;
+  }
+
+  /* ===== 酒杯 ===== */
+  .glass {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease;
+    transform-origin: bottom center;
+  }
+
+  .glass-bowl {
+    width: 58px;
+    height: 50px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top: 2px solid rgba(255,255,255,0.15);
+    border-radius: 4px 4px 50% 50%;
+    position: relative;
+    overflow: hidden;
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* 玻璃反光 */
+  .glass-bowl::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 9px;
+    width: 6px;
+    height: 18px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    transform: rotate(-12deg);
+    z-index: 2;
+  }
+
+  .glass-liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0%;
+    border-radius: 0 0 50% 50%;
+    transition: height 0.8s ease, background 0.4s ease;
+  }
+
+  .glass-stem {
+    width: 3px;
+    height: 30px;
+    background: rgba(255,255,255,0.3);
+  }
+
+  .glass-foot {
+    width: 38px;
+    height: 5px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+  }
+
+  /* 气泡（起泡酒用） */
+  .bubbles {
+    display: none;
+    position: absolute;
+    bottom: 0; left: 0; right: 0; top: 0;
+    z-index: 1;
+  }
+  .bubbles.active { display: block; }
+  .bubbles span {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(255,255,255,0.75);
+    border-radius: 50%;
+  }
+  .bubbles.active span {
+    animation: bubbleUp 2s infinite;
+  }
+  .bubbles span:nth-child(1) { left: 22%; animation-delay: 0s; animation-duration: 1.6s; }
+  .bubbles span:nth-child(2) { left: 48%; animation-delay: 0.4s; animation-duration: 2s; }
+  .bubbles span:nth-child(3) { left: 68%; animation-delay: 0.9s; animation-duration: 1.4s; }
+  .bubbles span:nth-child(4) { left: 36%; animation-delay: 1.3s; animation-duration: 1.8s; }
+  .bubbles span:nth-child(5) { left: 56%; animation-delay: 0.6s; animation-duration: 2.2s; }
+
+  @keyframes bubbleUp {
+    0%   { bottom: 2px; opacity: 0; transform: scale(0.4); }
+    20%  { opacity: 0.8; }
+    100% { bottom: 95%; opacity: 0; transform: scale(1); }
+  }
+
+  /* ===== 葡萄动画 ===== */
+  .grape-icon {
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    font-size: 52px;
+    opacity: 0;
+    transition: none;
+    z-index: 10;
+    filter: drop-shadow(0 0 12px rgba(128,0,128,0.4));
+  }
+
+  .grape-icon.pop {
+    animation: grapePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .grape-icon.fade {
+    animation: grapeFade 0.5s ease forwards;
+  }
+
+  @keyframes grapePop {
+    0%   { transform: translateX(-50%) scale(0) rotate(-20deg); opacity: 0; }
+    100% { transform: translateX(-50%) scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  @keyframes grapeFade {
+    0%   { transform: translateX(-50%) scale(1); opacity: 1; }
+    100% { transform: translateX(-50%) scale(0.5) translateY(-20px); opacity: 0; }
+  }
+
+  /* ===== 碰杯动画 ===== */
+  .cheers-area.clinking .glass-left {
+    animation: tiltL 0.35s ease-in-out infinite alternate;
+  }
+  .cheers-area.clinking .glass-right {
+    animation: tiltR 0.35s ease-in-out infinite alternate;
+  }
+
+  @keyframes tiltL {
+    0%   { transform: rotate(0deg) translateX(0); }
+    100% { transform: rotate(14deg) translateX(6px); }
+  }
+  @keyframes tiltR {
+    0%   { transform: rotate(0deg) translateX(0); }
+    100% { transform: rotate(-14deg) translateX(-6px); }
+  }
+
+  /* 碰上定格 */
+  .cheers-area.clinked .glass-left {
+    transform: rotate(14deg) translateX(6px);
+    transition: transform 0.15s ease;
+  }
+  .cheers-area.clinked .glass-right {
+    transform: rotate(-14deg) translateX(-6px);
+    transition: transform 0.15s ease;
+  }
+
+  /* 结果定格（微倾） */
+  .cheers-area.result .glass-left {
+    transform: rotate(6deg) translateX(3px);
+    transition: transform 0.6s ease;
+  }
+  .cheers-area.result .glass-right {
+    transform: rotate(-6deg) translateX(-3px);
+    transition: transform 0.6s ease;
+  }
+
+  /* ===== 结果卡片 ===== */
+  .result-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 30px 25px;
+    margin-bottom: 30px;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+  }
+
+  .result-card.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .result-card .type-badge {
+    display: inline-block;
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 14px;
+    letter-spacing: 2px;
+  }
+
+  .badge-red, .badge-fortified {
+    background: rgba(139,0,0,0.7);
+    border: 1px solid #cc3333;
+    color: #ffcccc;
+  }
+  .badge-white, .badge-dessert {
+    background: rgba(218,195,120,0.3);
+    border: 1px solid #dac378;
+    color: #fff5d4;
+  }
+  .badge-rose {
+    background: rgba(219,112,147,0.4);
+    border: 1px solid #db7093;
+    color: #ffe4ed;
+  }
+  .badge-sparkling {
+    background: rgba(255,215,0,0.3);
+    border: 1px solid #ffd700;
+    color: #fff8dc;
+  }
+
+  .grape { font-size: 1.5em; font-weight: bold; margin-bottom: 6px; }
+  .region { font-size: 1.05em; color: #c9a87c; margin-bottom: 12px; }
+  .flavor {
+    font-size: 0.85em;
+    color: #b89a7e;
+    line-height: 1.6;
+    margin-bottom: 14px;
+    padding: 0 10px;
+  }
+  .quote {
+    font-size: 0.95em;
+    color: #e8c9a0;
+    font-style: italic;
+    line-height: 1.6;
+    padding: 10px 15px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .placeholder-text {
+    color: #887766;
+    font-size: 1.1em;
+    line-height: 1.8;
+  }
+
+  /* ===== 按钮 ===== */
+  .btn {
+    background: linear-gradient(135deg, #8b2252, #c0392b);
+    color: white;
+    border: none;
+    padding: 16px 50px;
+    font-size: 1.2em;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 3px;
+    box-shadow: 0 4px 25px rgba(192,57,43,0.4);
+    transition: all 0.3s ease;
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(192,57,43,0.6);
+  }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .history {
+    margin-top: 28px;
+    font-size: 0.75em;
+    color: #776655;
+  }
+  .history span {
+    display: inline-block;
+    margin: 3px;
+    padding: 3px 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🍷 今天喝什么酒？</h1>
+  <p class="subtitle">碰一碰，让命运为你挑选</p>
+
+  <div class="cheers-area" id="cheersArea">
+
+    <div class="glass glass-left">
+      <div class="glass-bowl">
+        <div class="glass-liquid" id="liquidL"></div>
+        <div class="bubbles" id="bubblesL">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="glass-stem"></div>
+      <div class="glass-foot"></div>
+    </div>
+
+    <div class="grape-icon" id="grapeIcon">🍇</div>
+
+    <div class="glass glass-right">
+      <div class="glass-bowl">
+        <div class="glass-liquid" id="liquidR"></div>
+        <div class="bubbles" id="bubblesR">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="glass-stem"></div>
+      <div class="glass-foot"></div>
+    </div>
+
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <p class="placeholder-text">点击下方按钮<br>揭晓今日之选 ✦</p>
+  </div>
+
+  <button class="btn" id="drawBtn" onclick="draw()">🎲 抽 签</button>
+
+  <div class="history" id="history"></div>
+</div>
+
+<script>
+const wines = [
+
+  // ══════════ 红葡萄酒 ══════════
+  { type:"红葡萄酒", badge:"badge-red", grape:"赤霞珠 Cabernet Sauvignon",
+    region:"🇫🇷 法国 · 波尔多", flavor:"黑醋栗、雪松、烟草，单宁强劲",
+    quote:"人生就该像赤霞珠，敢涩才敢甜" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"黑皮诺 Pinot Noir",
+    region:"🇫🇷 法国 · 勃艮第", flavor:"樱桃、玫瑰花瓣、蘑菇，优雅细腻",
+    quote:"最迷人的东西从来都不张扬" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"西拉 Syrah",
+    region:"🇫🇷 法国 · 北罗纳河谷", flavor:"黑莓、黑胡椒、烟熏，浓郁饱满",
+    quote:"温柔的人偶尔也需要一点野性" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"设拉子 Shiraz",
+    region:"🇦🇺 澳大利亚 · 巴罗萨谷", flavor:"蓝莓、巧克力、桉树叶，奔放热烈",
+    quote:"南半球的阳光，一口就能喝到" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"梅洛 Merlot",
+    region:"🇫🇷 法国 · 波尔多右岸", flavor:"李子、巧克力、丝绒般顺滑",
+    quote:"不必总当主角，温柔本身就是力量" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"马尔贝克 Malbec",
+    region:"🇦🇷 阿根廷 · 门多萨", flavor:"蓝莓、紫罗兰、可可，饱满多汁",
+    quote:"安第斯山脚的浪漫，浓得化不开" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"桑娇维塞 Sangiovese",
+    region:"🇮🇹 意大利 · 托斯卡纳", flavor:"酸樱桃、番茄叶、皮革，酸度活泼",
+    quote:"托斯卡纳的夕阳，都藏在这杯酒里" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"丹魄 Tempranillo",
+    region:"🇪🇸 西班牙 · 里奥哈", flavor:"草莓、香草、烟叶，温暖优雅",
+    quote:"弗拉明戈的节奏感，一口就上头" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"内比奥罗 Nebbiolo",
+    region:"🇮🇹 意大利 · 皮埃蒙特", flavor:"玫瑰、焦油、樱桃，单宁强酸度高",
+    quote:"读懂它需要耐心，就像读懂一个人" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"佳美 Gamay",
+    region:"🇫🇷 法国 · 博若莱", flavor:"草莓、香蕉糖果、轻盈易饮",
+    quote:"今天不想长大，只想做快乐小孩" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"仙粉黛 Zinfandel",
+    region:"🇺🇸 美国 · 加州", flavor:"黑莓果酱、甘草、肉桂，浓郁奔放",
+    quote:"加州的自由精神，装在酒瓶里了" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"歌海娜 Grenache",
+    region:"🇪🇸 西班牙 · 普里奥拉托", flavor:"覆盆子、香料、焦糖，甜美温暖",
+    quote:"地中海的风，吹进了你的杯子" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"慕合怀特 Mourvèdre",
+    region:"🇫🇷 法国 · 邦多勒", flavor:"黑莓、野味、皮革，粗犷有力",
+    quote:"不修边幅的灵魂，往往最有深度" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"品丽珠 Cabernet Franc",
+    region:"🇫🇷 法国 · 卢瓦尔河谷", flavor:"红辣椒、覆盆子、铅笔芯，优雅草本",
+    quote:"低调的实力派，懂的人自然懂" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"佳丽酿 Carignan",
+    region:"🇫🇷 法国 · 朗格多克", flavor:"红李子、香料、灌木丛，质朴有力",
+    quote:"老藤的故事，每一口都是岁月" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"小维多 Petit Verdot",
+    region:"🇪🇸 西班牙 · 拉曼恰", flavor:"紫罗兰、蓝莓、香料，色深劲道",
+    quote:"虽然名字带个小，气场可一点不小" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"皮诺塔吉 Pinotage",
+    region:"🇿🇦 南非 · 斯泰伦博斯", flavor:"烟熏、红莓、咖啡、泥土气息",
+    quote:"彩虹之国酿出的，是彩虹的味道" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"多姿桃 Dolcetto",
+    region:"🇮🇹 意大利 · 皮埃蒙特", flavor:"黑樱桃、杏仁、甘草，柔和易饮",
+    quote:"名字里自带甜蜜，就像今晚的心情" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"巴贝拉 Barbera",
+    region:"🇮🇹 意大利 · 皮埃蒙特", flavor:"酸樱桃、香料、低单宁、高酸度",
+    quote:"意大利妈妈的餐桌上，永远少不了它" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"黑达沃拉 Nero d'Avola",
+    region:"🇮🇹 意大利 · 西西里岛", flavor:"黑樱桃、李子、巧克力、地中海香草",
+    quote:"西西里的热情，一杯就够了" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"佳美娜 Carmenère",
+    region:"🇨🇱 智利 · 中央山谷", flavor:"青椒、黑莓、咖啡、烟熏",
+    quote:"被全世界遗忘后在南美重生，这很摇滚" },
+  { type:"红葡萄酒", badge:"badge-red", grape:"国产多瑞加 Touriga Nacional",
+    region:"🇵🇹 葡萄牙 · 杜罗河谷", flavor:"紫罗兰、黑莓、岩石矿感、浓缩",
+    quote:"大航海时代的基因，骨子里就不安分" },
+
+  // ══════════ 白葡萄酒 ══════════
+  { type:"白葡萄酒", badge:"badge-white", grape:"霞多丽 Chardonnay",
+    region:"🇫🇷 法国 · 勃艮第", flavor:"青苹果、黄油、烤面包，过桶后丰腴",
+    quote:"百变女王，到哪儿都能成为主角" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"霞多丽 Chardonnay",
+    region:"🇦🇺 澳大利亚 · 阿德莱德山", flavor:"柑橘、白桃、矿物质，未过桶清爽",
+    quote:"素颜也很能打，清爽就是正义" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"长相思 Sauvignon Blanc",
+    region:"🇳🇿 新西兰 · 马尔堡", flavor:"百香果、青草、柑橘，清爽如刀锋",
+    quote:"一口下去，整个人都醒了" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"长相思 Sauvignon Blanc",
+    region:"🇫🇷 法国 · 卢瓦尔河谷", flavor:"燧石、柠檬、接骨木花，矿感十足",
+    quote:"法式优雅的清冷感，就是这个味道" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"雷司令 Riesling",
+    region:"🇩🇪 德国 · 莫泽尔", flavor:"青柠、蜂蜜、矿物质，酸度清冽",
+    quote:"甜与酸的完美平衡，像极了生活" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"雷司令 Riesling",
+    region:"🇫🇷 法国 · 阿尔萨斯", flavor:"白桃、柑橘、汽油调，干爽有力",
+    quote:"时间越久越迷人，它和你一样" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"灰皮诺 Pinot Grigio",
+    region:"🇮🇹 意大利 · 威尼托", flavor:"柠檬、白桃、杏仁，清淡爽口",
+    quote:"午后阳台上的一杯，刚刚好" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"琼瑶浆 Gewürztraminer",
+    region:"🇫🇷 法国 · 阿尔萨斯", flavor:"荔枝、玫瑰、姜味，芳香浓郁",
+    quote:"闻一下就微醺，何况喝一口" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"维欧尼 Viognier",
+    region:"🇫🇷 法国 · 北罗纳河谷", flavor:"杏子、桃花、香料，丰满芬芳",
+    quote:"像被春天拥抱了一下" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"阿尔巴利诺 Albariño",
+    region:"🇪🇸 西班牙 · 下海湾", flavor:"杏子、白花、海盐矿感",
+    quote:"闭上眼睛，你在大西洋边上" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"白诗南 Chenin Blanc",
+    region:"🇿🇦 南非 · 斯泰伦博斯", flavor:"黄苹果、蜂蜡、洋槐花",
+    quote:"千面百变，每一次打开都是惊喜" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"白诗南 Chenin Blanc",
+    region:"🇫🇷 法国 · 卢瓦尔河谷", flavor:"榅桲、蜂蜜、湿羊毛、矿石",
+    quote:"卢瓦尔河的秘密，只说给懂的人听" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"绿维特利纳 Grüner Veltliner",
+    region:"🇦🇹 奥地利 · 瓦豪", flavor:"白胡椒、青苹果、柑橘、矿感",
+    quote:"维也纳人的日常快乐水" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"华帝露 Verdejo",
+    region:"🇪🇸 西班牙 · 卢埃达", flavor:"青草、茴香、柑橘、微苦杏仁",
+    quote:"西班牙午后的微风，清新又慵懒" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"特浓情 Torrontés",
+    region:"🇦🇷 阿根廷 · 萨尔塔", flavor:"玫瑰、蜜桃、薰衣草、柑橘",
+    quote:"名字就很深情，酒更是" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"玛珊 Marsanne",
+    region:"🇫🇷 法国 · 北罗纳河谷", flavor:"杏仁、蜂蜡、白花、丰厚质感",
+    quote:"丰腴而低调，像冬天里的一条厚围巾" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"弗德乔 Verdelho",
+    region:"🇦🇺 澳大利亚 · 猎人谷", flavor:"青柠、瓜类、热带水果、草本",
+    quote:"阳光沙滩冲浪板，都在这一杯里" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"赛美蓉 Sémillon",
+    region:"🇦🇺 澳大利亚 · 猎人谷", flavor:"柠檬、烤面包、蜂蜡、坚果",
+    quote:"年轻时低调，陈年后惊艳全场" },
+  { type:"白葡萄酒", badge:"badge-white", grape:"密斯卡岱 Muscadet",
+    region:"🇫🇷 法国 · 卢瓦尔河口", flavor:"柠檬、海风、矿石、酵母",
+    quote:"一打生蚝配一杯，人间值得" },
+
+  // ══════════ 桃红葡萄酒 ══════════
+  { type:"桃红葡萄酒", badge:"badge-rose", grape:"歌海娜桃红 Grenache Rosé",
+    region:"🇫🇷 法国 · 普罗旺斯", flavor:"草莓、西柚、薰衣草，浅粉优雅",
+    quote:"人生需要一点粉色滤镜" },
+  { type:"桃红葡萄酒", badge:"badge-rose", grape:"神索桃红 Cinsault Rosé",
+    region:"🇫🇷 法国 · 南法", flavor:"红莓、蜜瓜、白花，清新淡雅",
+    quote:"周末从来不需要理由，但需要一杯桃红" },
+  { type:"桃红葡萄酒", badge:"badge-rose", grape:"丹魄桃红 Tempranillo Rosado",
+    region:"🇪🇸 西班牙 · 纳瓦拉", flavor:"樱桃、草莓、白胡椒，活泼明亮",
+    quote:"西班牙的黄昏，最适合用粉色来干杯" },
+  { type:"桃红葡萄酒", badge:"badge-rose", grape:"黑皮诺桃红 Pinot Noir Rosé",
+    region:"🇺🇸 美国 · 俄勒冈", flavor:"覆盆子、西瓜、矿物质，精致清冽",
+    quote:"优雅和少女心可以同时拥有" },
+
+  // ══════════ 起泡酒 ══════════
+  { type:"起泡酒", badge:"badge-sparkling", grape:"香槟 Champagne",
+    region:"🇫🇷 法国 · 香槟区", flavor:"吐司、柑橘、细密气泡",
+    quote:"快乐的事不需要很大，有泡泡就行" },
+  { type:"起泡酒", badge:"badge-sparkling", grape:"香槟桃红 Rosé Champagne",
+    region:"🇫🇷 法国 · 香槟区", flavor:"红莓、烤面包、奶油、细腻气泡",
+    quote:"粉色的泡泡，是成年人的童话" },
+  { type:"起泡酒", badge:"badge-sparkling", grape:"普罗塞克 Prosecco",
+    region:"🇮🇹 意大利 · 威尼托", flavor:"青苹果、白花、气泡活泼",
+    quote:"一切烦恼随着泡泡升起而消融" },
+  { type:"起泡酒", badge:"badge-sparkling", grape:"卡瓦 Cava",
+    region:"🇪🇸 西班牙 · 加泰罗尼亚", flavor:"柠檬、坚果、矿物，传统法酿造",
+    quote:"香槟的做法，一半的价格，同样的快乐" },
+  { type:"起泡酒", badge:"badge-sparkling", grape:"弗朗齐亚柯达 Franciacorta",
+    region:"🇮🇹 意大利 · 伦巴第", flavor:"榛果、白花、柑橘、酵母面包",
+    quote:"意大利人藏起来的秘密武器" },
+  { type:"起泡酒", badge:"badge-sparkling", grape:"克雷芒 Crémant d'Alsace",
+    region:"🇫🇷 法国 · 阿尔萨斯", flavor:"青苹果、白花、矿石、细腻泡沫",
+    quote:"不叫香槟，但快乐一点都不少" },
+  { type:"起泡酒", badge:"badge-sparkling", grape:"蓝布鲁斯科 Lambrusco",
+    region:"🇮🇹 意大利 · 艾米利亚", flavor:"红莓、紫罗兰、微甜、轻微气泡",
+    quote:"谁说红酒不能有泡泡？" },
+  { type:"起泡酒", badge:"badge-sparkling", grape:"阿斯蒂 Moscato d'Asti",
+    region:"🇮🇹 意大利 · 皮埃蒙特", flavor:"蜜桃、橙花、麝香葡萄、微甜",
+    quote:"低酒精度的温柔，醉不了但甜到心里" },
+
+  // ══════════ 甜酒 ══════════
+  { type:"甜酒", badge:"badge-dessert", grape:"苏玳贵腐 Sauternes",
+    region:"🇫🇷 法国 · 苏玳", flavor:"杏脯、蜂蜜、番红花、贵腐菌的魔法",
+    quote:"腐烂也能成就伟大，这就是贵腐的哲学" },
+  { type:"甜酒", badge:"badge-dessert", grape:"托卡伊 Tokaji Aszú",
+    region:"🇭🇺 匈牙利 · 托卡伊", flavor:"杏子、橘子酱、蜂蜜、焦糖",
+    quote:"曾被路易十四称为「酒中之王」" },
+  { type:"甜酒", badge:"badge-dessert", grape:"冰酒 Icewine",
+    region:"🇨🇦 加拿大 · 尼亚加拉", flavor:"蜂蜜、芒果、荔枝、极致甜蜜",
+    quote:"零下八度采收的葡萄，甜得让人心疼" },
+  { type:"甜酒", badge:"badge-dessert", grape:"佩德罗·希梅内斯 PX Sherry",
+    region:"🇪🇸 西班牙 · 赫雷斯", flavor:"葡萄干、太妃糖、无花果、焦糖",
+    quote:"甜到灵魂出窍，浇在冰淇淋上是神操作" },
+  { type:"甜酒", badge:"badge-dessert", grape:"逐粒精选 Beerenauslese",
+    region:"🇩🇪 德国 · 莱茵高", flavor:"蜂蜜、杏桃、热带水果、酸度精致",
+    quote:"一颗一颗挑选的甜蜜，值得等待" },
+
+  // ══════════ 加强酒 ══════════
+  { type:"加强酒", badge:"badge-fortified", grape:"波特酒 Port (Tawny)",
+    region:"🇵🇹 葡萄牙 · 杜罗河谷", flavor:"太妃糖、坚果、焦糖、干果",
+    quote:"壁炉边的一杯，时间慢下来了" },
+  { type:"加强酒", badge:"badge-fortified", grape:"波特酒 Port (Ruby)",
+    region:"🇵🇹 葡萄牙 · 杜罗河谷", flavor:"红莓、黑樱桃、巧克力、香料",
+    quote:"年轻热烈，像杜罗河谷的日落" },
+  { type:"加强酒", badge:"badge-fortified", grape:"雪莉酒 Fino Sherry",
+    region:"🇪🇸 西班牙 · 赫雷斯", flavor:"杏仁、海盐、酵母面包、极干",
+    quote:"全世界最被低估的酒，识货的人偷着乐" },
+  { type:"加强酒", badge:"badge-fortified", grape:"马德拉 Madeira",
+    region:"🇵🇹 葡萄牙 · 马德拉岛", flavor:"焦糖、坚果、橙皮、永远不会坏",
+    quote:"能存一百年的酒，比你我都长寿" },
+  { type:"加强酒", badge:"badge-fortified", grape:"麝香加强酒 Rutherglen Muscat",
+    region:"🇦🇺 澳大利亚 · 路斯格兰", flavor:"葡萄干、太妃糖、玫瑰、茶叶",
+    quote:"澳洲的液体焦糖，一小口就够甜一晚" }
+];
+
+/* ====== 颜色映射 ====== */
+const liquidColors = {
+  'badge-red':       'rgba(110, 8, 20, 0.88)',
+  'badge-fortified': 'rgba(110, 8, 20, 0.88)',
+  'badge-white':     'rgba(235, 215, 120, 0.72)',
+  'badge-dessert':   'rgba(235, 215, 120, 0.72)',
+  'badge-sparkling': 'rgba(240, 230, 160, 0.55)',
+  'badge-rose':      'rgba(220, 110, 140, 0.65)'
+};
+
+/* ====== DOM ====== */
+const cheers    = document.getElementById('cheersArea');
+const grapeEl   = document.getElementById('grapeIcon');
+const liquidL   = document.getElementById('liquidL');
+const liquidR   = document.getElementById('liquidR');
+const bubblesL  = document.getElementById('bubblesL');
+const bubblesR  = document.getElementById('bubblesR');
+const card      = document.getElementById('resultCard');
+const btn       = document.getElementById('drawBtn');
+
+let isDrawing   = false;
+let historyList = [];
+
+/* ====== 重置 ====== */
+function resetGlasses () {
+  cheers.classList.remove('clinking', 'clinked', 'result');
+  grapeEl.classList.remove('pop', 'fade');
+  grapeEl.style.opacity = '0';
+  liquidL.style.height = '0';
+  liquidR.style.height = '0';
+  liquidL.style.background = 'transparent';
+  liquidR.style.background = 'transparent';
+  bubblesL.classList.remove('active');
+  bubblesR.classList.remove('active');
+  card.classList.remove('show');
+}
+
+/* ====== 抽签 ====== */
+function draw () {
+  if (isDrawing) return;
+  isDrawing = true;
+  btn.disabled = true;
+
+  resetGlasses();
+
+  /* 微延迟让 reset 生效 */
+  setTimeout(() => {
+
+    /* ── Phase 1 : 碰杯摇晃 ── */
+    cheers.classList.add('clinking');
+
+    setTimeout(() => {
+      /* ── Phase 2 : 碰上 + 葡萄弹出 ── */
+      cheers.classList.remove('clinking');
+      cheers.classList.add('clinked');
+      grapeEl.classList.remove('fade');
+      grapeEl.classList.add('pop');
+
+      setTimeout(() => {
+        /* ── Phase 3 : 选酒、倒酒、出结果 ── */
+        const wine  = wines[Math.floor(Math.random() * wines.length)];
+        const color = liquidColors[wine.badge];
+
+        /* 葡萄淡出 */
+        grapeEl.classList.remove('pop');
+        grapeEl.classList.add('fade');
+
+        /* 杯子微倾 */
+        cheers.classList.remove('clinked');
+        cheers.classList.add('result');
+
+        /* 倒酒 */
+        liquidL.style.background = color;
+        liquidR.style.background = color;
+        liquidL.style.height = '68%';
+        liquidR.style.height = '68%';
+
+        /* 起泡酒气泡 */
+        if (wine.badge === 'badge-sparkling') {
+          bubblesL.classList.add('active');
+          bubblesR.classList.add('active');
+        }
+
+        /* 结果卡片 */
+        setTimeout(() => {
+          card.innerHTML = `
+            <span class="type-badge ${wine.badge}">${wine.type}</span>
+            <div class="grape">${wine.grape}</div>
+            <div class="region">${wine.region}</div>
+            <div class="flavor">「${wine.flavor}」</div>
+            <div class="quote">${wine.quote}</div>
+          `;
+          card.classList.add('show');
+
+          historyList.unshift(wine.grape.split(' ')[0]);
+          if (historyList.length > 5) historyList.pop();
+          document.getElementById('history').innerHTML =
+            historyList.length > 1
+              ? '最近抽到：' + historyList.map(h => `<span>${h}</span>`).join('')
+              : '';
+
+          btn.disabled  = false;
+          btn.textContent = '🎲 再来一签';
+          isDrawing = false;
+        }, 700);
+
+      }, 850);
+    }, 1200);
+  }, 80);
+}
+</script>
+
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
